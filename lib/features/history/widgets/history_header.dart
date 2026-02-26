@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'filter_dialog.dart';
 class HistoryHeader extends StatefulWidget {
   final bool isGrid;
   final VoidCallback onToggleView;
@@ -83,11 +83,27 @@ class _HistoryHeaderState extends State<HistoryHeader> {
               ),
 
               /// Filter Button (styled like the screenshot)
+              /// Filter Button (ปุ่มตัวกรอง)
               GestureDetector(
-                onTap: widget.onFilterTap,
+                onTap: () {
+                  // เรียกหน้ากรองข้อมูลขึ้นมา
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true, // เพื่อให้เลื่อนขึ้นมาได้สูงตามเนื้อหา
+                    backgroundColor: Colors.transparent, // เพื่อให้เห็นขอบโค้งของ FilterDialog
+                    builder: (context) => Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom, // ดันขึ้นหนีคีย์บอร์ด
+                      ),
+                      child: const FilterDialog(), // เรียกไฟล์ที่คุณพึ่งสร้าง
+                    ),
+                  );
+                  
+                  // เรียก Callback เดิมที่ส่งมาจากข้างนอกด้วย (ถ้ามี)
+                  widget.onFilterTap();
+                },
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: colorScheme.onPrimary.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
@@ -100,7 +116,7 @@ class _HistoryHeaderState extends State<HistoryHeader> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.tune, // ไอคอน filter แบบ horizontal sliders
+                        Icons.tune,
                         color: colorScheme.onPrimary,
                         size: 16,
                       ),
