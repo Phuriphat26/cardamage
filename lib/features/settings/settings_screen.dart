@@ -1,13 +1,67 @@
 import 'package:flutter/material.dart';
+import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
+import 'help_support_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isNotificationOn = false;
+  String _currentLanguage = 'ไทย'; // สถานะจำลองสำหรับแสดงชื่อภาษา
+
+  // ฟังก์ชันแสดงรายการเลือกภาษา
+  void _showLanguagePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'เลือกภาษา',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.language, color: Colors.blue),
+                title: const Text('ไทย'),
+                trailing: _currentLanguage == 'ไทย' ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  setState(() => _currentLanguage = 'ไทย');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.language, color: Colors.orange),
+                title: const Text('English'),
+                trailing: _currentLanguage == 'English' ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  setState(() => _currentLanguage = 'English');
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // ใช้สีพื้นหลังเทาอ่อนเพื่อให้ Card สีขาวดูเด่นขึ้น
     final backgroundColor = Colors.grey[100];
-    const primaryColor = Color(0xFF1B3E6D); // สีน้ำเงินเข้มตามธีม
+    const primaryColor = Color(0xFF1B3E6D);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -19,20 +73,18 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: primaryColor),
-            onPressed: () {},
-          )
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           _buildSectionTitle('ข้อมูลผู้ใช้'),
           _buildSettingsGroup([
-            _buildListTile(Icons.person_outline, 'ข้อมูลส่วนตัว', onTap: () {}),
-            _buildListTile(Icons.lock_outline, 'เปลี่ยนรหัสผ่าน', onTap: () {}),
+            _buildListTile(Icons.person_outline, 'ข้อมูลส่วนตัว', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
+            }),
+            _buildListTile(Icons.lock_outline, 'เปลี่ยนรหัสผ่าน', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen()));
+            }),
           ]),
 
           _buildSectionTitle('การแจ้งเตือน'),
@@ -41,8 +93,8 @@ class SettingsScreen extends StatelessWidget {
               Icons.notifications_none, 
               'การแจ้งเตือน', 
               trailing: Switch(
-                value: false, 
-                onChanged: (val) {},
+                value: _isNotificationOn, 
+                onChanged: (val) => setState(() => _isNotificationOn = val),
                 activeColor: primaryColor,
               ),
             ),
@@ -50,28 +102,40 @@ class SettingsScreen extends StatelessWidget {
 
           _buildSectionTitle('การตั้งค่าทั่วไป'),
           _buildSettingsGroup([
-            _buildListTile(Icons.language, 'ภาษา', trailingText: 'ไทย', onTap: () {}),
+            // ปรับส่วนนี้ให้เรียกฟังก์ชันเลือกภาษา
             _buildListTile(
-              Icons.wb_sunny_outlined, 
-              'โหมดมืด', 
-              trailing: Switch(
-                value: false, 
-                onChanged: (val) {},
-                activeColor: primaryColor,
-              ),
+              Icons.language, 
+              'ภาษา', 
+              trailingText: _currentLanguage, 
+              onTap: _showLanguagePicker,
             ),
           ]),
 
           _buildSectionTitle('อื่นๆ'),
           _buildSettingsGroup([
-            _buildListTile(Icons.help_outline, 'ช่วยเหลือและสนับสนุน', onTap: () {}),
+            _buildListTile(Icons.help_outline, 'ช่วยเหลือและสนับสนุน', onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
+            }),
             _buildListTile(
               Icons.logout, 
               'ออกจากระบบ', 
               textColor: Colors.red, 
               iconColor: Colors.red,
               showChevron: false,
-              onTap: () {},
+              onTap: () {
+                // ตัวอย่าง Dialog เมื่อกดออกจากระบบ
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('ออกจากระบบ'),
+                    content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('ยกเลิก')),
+                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('ยืนยัน', style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+              },
             ),
           ]),
           const SizedBox(height: 30),
@@ -80,7 +144,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ส่วนหัวข้อกลุ่ม
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, top: 20, bottom: 8),
@@ -95,7 +158,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ส่วนรวมรายการให้อยู่ใน Card สีขาวใบเดียวกัน
   Widget _buildSettingsGroup(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
@@ -123,7 +185,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // รายการแต่ละบรรทัด
   Widget _buildListTile(
     IconData icon, 
     String title, {
